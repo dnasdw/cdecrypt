@@ -16,41 +16,20 @@
 	You should have received a copy of the GNU General Public License
 	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-#define _CRT_SECURE_NO_WARNINGS
-
 
 unsigned char WiiUCommenDevKey[16] =
 {
     0x2F, 0x5C, 0x1B, 0x29, 0x44, 0xE7, 0xFD, 0x6F, 0xC3, 0x97, 0x96, 0x4B, 0x05, 0x76, 0x91, 0xFA, 
 };
+
 unsigned char WiiUCommenKey[16] =
 {
     0xD7, 0xB0, 0x04, 0x02, 0x65, 0x9B, 0xA2, 0xAB, 0xD2, 0xCB, 0x0D, 0xB2, 0x7F, 0xA2, 0xB6, 0x56, 
 };
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
+#include <sdw.h>
 #include <openssl\aes.h>
 #include <openssl\sha.h>
-#include <time.h>
-#include <vector>
-#include <direct.h>
-#include <ctype.h>
-
-#pragma comment(lib,"libeay32.lib")
-
-typedef unsigned	__int64 u64;
-typedef signed		__int64 s64;
-
-typedef unsigned	int u32;
-typedef signed		int s32;
-
-typedef unsigned	short u16;
-typedef signed		short s16;
-
-typedef unsigned	char u8;
-typedef signed		char s8;
 
 AES_KEY key;
 u8 enc_title_key[16];
@@ -124,6 +103,7 @@ struct FSTInfo
 	u32 UnknownB;
 	u32 UnknownC[6];
 };
+
 struct FST
 {
 	u32 MagicBytes;
@@ -171,10 +151,12 @@ u32 bs24( u32 i )
 {
 	return ((i&0xFF0000)>>16) | ((i&0xFF)<<16) | (i&0x00FF00);
 }
+
 u64 bs64( u64 i )
 {
 	return ((u64)(bs32(i&0xFFFFFFFF))<<32) | (bs32(i>>32));
 }
+
 char *ReadFile( const char *Name, u32 *Length )
 {
 	FILE *in = fopen(Name,"rb");
@@ -197,6 +179,7 @@ char *ReadFile( const char *Name, u32 *Length )
 
 	return Data;
 }
+
 void FileDump( const char *Name, void *Data, u32 Length )
 {
 	if( Data == NULL )
@@ -223,16 +206,18 @@ void FileDump( const char *Name, void *Data, u32 Length )
 
 	fclose( Out );
 }
+
 static char ascii(char s)
 {
   if(s < 0x20) return '.';
   if(s > 0x7E) return '.';
   return s;
 }
-void hexdump(void *d, s32 len)
+
+void hexdump(void *d, n32 len)
 {
   u8 *data;
-  s32 i, off;
+  n32 i, off;
   data = (u8*)d;
   for (off=0; off<len; off += 16)
   {
@@ -250,7 +235,9 @@ void hexdump(void *d, s32 len)
     printf("\n");
   }
 }
+
 #define	BLOCK_SIZE	0x10000
+
 void ExtractFileHash( FILE *in, u64 PartDataOffset, u64 FileOffset, u64 Size, char *FileName, u16 ContentID )
 {
 	char encdata[BLOCK_SIZE];
@@ -328,8 +315,10 @@ void ExtractFileHash( FILE *in, u64 PartDataOffset, u64 FileOffset, u64 Size, ch
 	
 	fclose( out );
 }
+
 #undef BLOCK_SIZE
 #define	BLOCK_SIZE	0x8000
+
 void ExtractFile( FILE *in, u64 PartDataOffset, u64 FileOffset, u64 Size, char *FileName, u16 ContentID )
 {
 	char encdata[BLOCK_SIZE];
@@ -384,7 +373,8 @@ void ExtractFile( FILE *in, u64 PartDataOffset, u64 FileOffset, u64 Size, char *
 	
 	fclose( out );
 }
-s32 main( s32 argc, char*argv[])
+
+int main(int argc, char*argv[])
 {
 	char str[1024];
 	
@@ -497,10 +487,10 @@ s32 main( s32 argc, char*argv[])
 	printf("FST entries:%u\n", Entries );
 
 	char *Path = new char[1024];
-	s32 Entry[16];
-	s32 LEntry[16];
+	n32 Entry[16];
+	n32 LEntry[16];
 	
-	s32 level=0;
+	n32 level=0;
 
 	for( u32 i=1; i < Entries; ++i )
 	{
@@ -527,7 +517,7 @@ s32 main( s32 argc, char*argv[])
 		{
 			memset( Path, 0, 1024 );
 
-			for( s32 j=0; j<level; ++j )
+			for( n32 j=0; j<level; ++j )
 			{
 				if(j)
 					Path[strlen(Path)] = '\\';
